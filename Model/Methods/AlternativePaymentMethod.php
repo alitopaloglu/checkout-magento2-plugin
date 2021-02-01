@@ -499,7 +499,7 @@ class AlternativePaymentMethod extends AbstractMethod
         $tax = 0;
         $quote = $this->quoteHandler->getQuote();
         foreach ($quote->getAllVisibleItems() as $item) {
-            $lineTotal = (($item->getPrice() * $item->getQty()) - $item->getDiscountAmount() + $item->getTaxAmount());
+            $lineTotal = (($item->getBasePrice() * $item->getQty()) - $item->getBaseDiscountAmount() + $item->getTaxAmount());
             $price =  ($lineTotal * 100) / $item->getQty();
             $product = new Product();
             $product->name = $item->getName();
@@ -507,7 +507,7 @@ class AlternativePaymentMethod extends AbstractMethod
             $product->unit_price = $price;
             $product->tax_rate = $item->getTaxPercent() *100;
             $product->total_amount = $lineTotal *100;
-            $product->total_tax_amount = $item->getTaxAmount() *100;
+            $product->total_tax_amount = $item->getBaseTaxAmount() *100;
 
             $tax += $product->total_tax_amount;
             $products []= $product;
@@ -520,10 +520,10 @@ class AlternativePaymentMethod extends AbstractMethod
             $product = new Product();
             $product->name = $shipping->getShippingDescription();
             $product->quantity = 1;
-            $product->unit_price = $shipping->getShippingInclTax() *100;
+            $product->unit_price = $shipping->getBaseShippingInclTax() *100;
             $product->tax_rate = $shipping->getTaxPercent() *100;
-            $product->total_amount = $shipping->getShippingAmount() *100;
-            $product->total_tax_amount = $shipping->getTaxAmount() *100;
+            $product->total_amount = $shipping->getBaseShippingAmount() *100;
+            $product->total_tax_amount = $shipping->getBaseTaxAmount() *100;
             $product->type = 'shipping_fee';
 
             $tax  += $product->total_tax_amount;
@@ -581,7 +581,7 @@ class AlternativePaymentMethod extends AbstractMethod
         $products = [];
         $quote = $this->quoteHandler->getQuote();
         foreach ($quote->getAllVisibleItems() as $item) {
-            $lineTotal = (($item->getPrice() * $item->getQty()) - $item->getDiscountAmount() + $item->getTaxAmount());
+            $lineTotal = (($item->getBasePrice() * $item->getQty()) - $item->getBaseDiscountAmount() + $item->getBaseTaxAmount());
             $price =  ($lineTotal * 100) / $item->getQty();
             $product = new Product();
             $product->description = $item->getName();
@@ -594,11 +594,11 @@ class AlternativePaymentMethod extends AbstractMethod
         // Shipping fee
         $shipping = $quote->getShippingAddress();
 
-        if ($shipping->getShippingDescription() && $shipping->getShippingInclTax() > 0) {
+        if ($shipping->getShippingDescription() && $shipping->getBaseShippingInclTax() > 0) {
             $product = new Product();
             $product->description = $shipping->getShippingDescription();
             $product->quantity = 1;
-            $product->price = $shipping->getShippingInclTax() *100;
+            $product->price = $shipping->getBaseShippingInclTax() *100;
             $product->product_id = 0;
 
             $products[] = $product;

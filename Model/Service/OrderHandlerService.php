@@ -185,7 +185,7 @@ class OrderHandlerService
     public function amountToGateway($amount, $order)
     {
         // Get the order currency
-        $currency = $this->getOrderCurrency($order);
+        $currency = $order->getBaseCurrencyCode();
 
         // Get the x1 currency calculation mapping
         $currenciesX1 = explode(

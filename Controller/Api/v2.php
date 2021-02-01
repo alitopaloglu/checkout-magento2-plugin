@@ -279,8 +279,8 @@ class V2 extends \Magento\Framework\App\Action\Action
         ->get('checkoutcom_card_payment')
         ->sendPaymentRequest(
             $payload,
-            $order->getGrandTotal(),
-            $order->getOrderCurrencyCode(),
+            $order->getBaseGrandTotal(),
+            $order->getBaseCurrencyCode(),
             $order->getIncrementId(),
             $this->quote,
             true

@@ -146,7 +146,7 @@ class MotoPaymentRequest implements \Magento\Framework\Event\ObserverInterface
             // Set the payment
             $request = new Payment(
                 $source,
-                $this->order->getOrderCurrencyCode()
+                $this->order->getBaseCurrencyCode()
             );
 
             // Prepare the metadata array
@@ -225,7 +225,7 @@ class MotoPaymentRequest implements \Magento\Framework\Event\ObserverInterface
     public function prepareMotoAmount()
     {
         // Get the payment instance
-        $amount = $this->order->getGrandTotal();
+        $amount = $this->order->getBaseGrandTotal();
         // Return the formatted amount
         return $this->orderHandler->amountToGateway(
             $this->utilities->formatDecimals($amount),

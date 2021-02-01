@@ -312,7 +312,7 @@ class QuoteHandlerService
      */
     public function getQuoteValue()
     {
-        return $this->getQuote()->collectTotals()->getGrandTotal();
+        return $this->getQuote()->collectTotals()->getBaseGrandTotal();
     }
 
     /**

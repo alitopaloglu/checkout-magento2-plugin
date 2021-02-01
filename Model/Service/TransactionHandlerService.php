@@ -471,7 +471,7 @@ class TransactionHandlerService
     public function amountFromGateway($amount, $order = null)
     {
         // Get the quote currency
-        $currency = $order ? $order->getOrderCurrencyCode() : $this->order->getOrderCurrencyCode();
+        $currency = $order ? $order->getBaseCurrencyCode() : $this->order->getBaseCurrencyCode();
 
         // Get the x1 currency calculation mapping
         $currenciesX1 = explode(
@@ -560,7 +560,7 @@ class TransactionHandlerService
         $creditMemos = $this->order->getCreditmemosCollection();
         if (!empty($creditMemos)) {
             foreach ($creditMemos as $creditMemo) {
-                $total += $creditMemo->getGrandTotal();
+                $total += $creditMemo->getBaseGrandTotal();
             }
         }
 
@@ -672,10 +672,10 @@ class TransactionHandlerService
         }
         
         // Get the total refunded
-        $totalRefunded = $processed ? $this->order->getTotalRefunded() : $this->order->getTotalRefunded() + $amount;
+        $totalRefunded = $processed ? $this->order->getBaseTotalRefunded() : $this->order->getBaseTotalRefunded() + $amount;
 
         // Check the partial refund case
-        $isPartialRefund = $this->order->getGrandTotal() > ($totalRefunded);
+        $isPartialRefund = $this->order->getBaseGrandTotal() > ($totalRefunded);
 
         return $isPartialRefund && $isRefund ? true : false;
     }
@@ -686,10 +686,10 @@ class TransactionHandlerService
     public function isPartialCapture($amount, $isCapture)
     {
         // Get the total captured
-        $totalCaptured = $this->order->getTotalInvoiced();
+        $totalCaptured = $this->order->getBaseTotalInvoiced();
 
         // Check the partial capture case
-        $isPartialCapture = $this->order->getGrandTotal() > ($totalCaptured + $amount);
+        $isPartialCapture = $this->order->getBaseGrandTotal() > ($totalCaptured + $amount);
 
         return $isPartialCapture && $isCapture ? true : false;
     }

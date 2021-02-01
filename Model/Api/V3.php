@@ -399,8 +399,8 @@ class V3 implements \CheckoutCom\Magento2\Api\V3Interface
             ->get($this->data->getPaymentMethod())
             ->sendPaymentRequest(
                 $payload,
-                $order->getGrandTotal(),
-                $order->getOrderCurrencyCode(),
+                $order->getBaseGrandTotal(),
+                $order->getBaseCurrencyCode(),
                 $order->getIncrementId(),
                 $this->quote,
                 true,
