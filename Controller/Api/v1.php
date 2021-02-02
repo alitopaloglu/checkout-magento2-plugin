@@ -184,7 +184,7 @@ class V1 extends \Magento\Framework\App\Action\Action
         ->sendPaymentRequest(
             $payload,
             $order->getGrandTotal(),
-            $order->getOrderCurrencyCode(),
+            $order->getBaseCurrencyCode(),
             $order->getIncrementId()
         );
     }

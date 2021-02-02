@@ -140,7 +140,7 @@ class ApiHandlerService
             // Prepare the request
             $request = new Capture($paymentInfo['id']);
             $request->amount = $this->orderHandler->amountToGateway(
-                $this->utilities->formatDecimals($amount * $order->getBaseToOrderRate()),
+                $this->utilities->formatDecimals($amount),
                 $order
             );
 
@@ -196,7 +196,7 @@ class ApiHandlerService
         if (isset($paymentInfo['id'])) {
             $request = new Refund($paymentInfo['id']);
             $request->amount = $this->orderHandler->amountToGateway(
-                $this->utilities->formatDecimals($amount * $order->getBaseToOrderRate()),
+                $this->utilities->formatDecimals($amount),
                 $order
             );
 

@@ -121,6 +121,16 @@ class TransactionHandlerService
     protected $convertor;
 
     /**
+     * @var \Magento\Directory\Model\CurrencyFactory
+     */
+    public $currencyFactory;
+
+    /**
+     * @var \Magento\Store\Model\StoreManagerInterface
+     */
+    public $storeManager;
+
+    /**
      * TransactionHandlerService constructor.
      */
     public function __construct(
@@ -137,7 +147,9 @@ class TransactionHandlerService
         \CheckoutCom\Magento2\Gateway\Config\Config $config,
         \Magento\Sales\Api\OrderManagementInterface $orderManagement,
         \Magento\Sales\Model\Order $orderModel,
-        \Magento\Sales\Model\Convert\OrderFactory $convertOrderFactory
+        \Magento\Sales\Model\Convert\OrderFactory $convertOrderFactory,
+        \Magento\Directory\Model\CurrencyFactory $currencyFactory,
+        \Magento\Store\Model\StoreManagerInterface $storeManager
     ) {
         $this->orderSender           = $orderSender;
         $this->transactionSearch     = $transactionSearch;
@@ -153,6 +165,8 @@ class TransactionHandlerService
         $this->orderManagement       = $orderManagement;
         $this->orderModel            = $orderModel;
         $this->convertor = $convertOrderFactory->create();
+        $this->currencyFactory = $currencyFactory;
+        $this->storeManager = $storeManager;
     }
 
     /**
@@ -470,8 +484,10 @@ class TransactionHandlerService
      */
     public function amountFromGateway($amount, $order = null)
     {
-        // Get the quote currency
-        $currency = $order ? $order->getOrderCurrencyCode() : $this->order->getOrderCurrencyCode();
+        // Get the order currency
+        $orderCurrency = $order ? $order->getOrderCurrencyCode() : $this->order->getOrderCurrencyCode();
+
+        $amount = $this->convertToOrderCurrency($amount, $orderCurrency);
 
         // Get the x1 currency calculation mapping
         $currenciesX1 = explode(
@@ -486,13 +502,28 @@ class TransactionHandlerService
         );
 
         // Prepare the amount
-        if (in_array($currency, $currenciesX1)) {
+        if (in_array($orderCurrency, $currenciesX1)) {
             return $amount;
-        } elseif (in_array($currency, $currenciesX1000)) {
-            return $amount/1000;
+        } elseif (in_array($orderCurrency, $currenciesX1000)) {
+            return round($amount/1000, 2, PHP_ROUND_HALF_UP);
         } else {
-            return $amount/100;
+            return round($amount/100, 2, PHP_ROUND_HALF_UP);
         }
+    }
+
+    public function convertToOrderCurrency($amount, $orderCurrency) {
+
+        $baseCurrencyCode =  $this->storeManager->getStore()
+            ->getBaseCurrency()
+            ->getCode();
+
+        $rate = $this->currencyFactory->create()
+            ->load($baseCurrencyCode)
+            ->getAnyRate($orderCurrency);
+
+        $convertedPrice = $amount * $rate;
+
+        return $convertedPrice;
     }
 
     /**

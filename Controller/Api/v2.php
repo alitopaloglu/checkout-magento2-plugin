@@ -280,7 +280,7 @@ class V2 extends \Magento\Framework\App\Action\Action
         ->sendPaymentRequest(
             $payload,
             $order->getGrandTotal(),
-            $order->getOrderCurrencyCode(),
+            $order->getBaseCurrencyCode(),
             $order->getIncrementId(),
             $this->quote,
             true

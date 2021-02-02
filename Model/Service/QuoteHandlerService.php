@@ -75,6 +75,11 @@ class QuoteHandlerService
     public $logger;
 
     /**
+     * @var \Magento\Directory\Model\CurrencyFactory
+     */
+    public $currencyFactory;
+
+    /**
      * QuoteHandlerService constructor
      */
     public function __construct(
@@ -87,7 +92,8 @@ class QuoteHandlerService
         \Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
         \CheckoutCom\Magento2\Gateway\Config\Config $config,
         \CheckoutCom\Magento2\Model\Service\ShopperHandlerService $shopperHandler,
-        \CheckoutCom\Magento2\Helper\Logger $logger
+        \CheckoutCom\Magento2\Helper\Logger $logger,
+        \Magento\Directory\Model\CurrencyFactory $currencyFactory
     ) {
         $this->checkoutSession = $checkoutSession;
         $this->customerSession = $customerSession;
@@ -99,6 +105,7 @@ class QuoteHandlerService
         $this->config = $config;
         $this->shopperHandler = $shopperHandler;
         $this->logger = $logger;
+        $this->currencyFactory = $currencyFactory;
     }
 
     /**
@@ -283,8 +290,10 @@ class QuoteHandlerService
     public function amountToGateway($amount, $quote)
     {
         // Get the quote currency
-        $currency = $this->getQuoteCurrency($quote);
-
+         $baseCurrencyCode =  $this->storeManager->getStore()
+            ->getBaseCurrency()
+            ->getCode();
+         $amount = $this->covertToBaseCurrency($amount);
         // Get the x1 currency calculation mapping
         $currenciesX1 = explode(
             ',',
@@ -298,13 +307,36 @@ class QuoteHandlerService
         );
 
         // Prepare the amount
-        if (in_array($currency, $currenciesX1)) {
-            return $amount;
-        } elseif (in_array($currency, $currenciesX1000)) {
-            return $amount*1000;
+        if (in_array($baseCurrencyCode, $currenciesX1)) {
+            return floor($amount);
+        } elseif (in_array($baseCurrencyCode, $currenciesX1000)) {
+            return floor($amount*1000);
         } else {
-            return $amount*100;
+            return floor($amount*100);
         }
+    }
+
+    /**
+     * @param $amount
+     * @return float|int
+     * Comvert amount from quote/order currency to base currency so the gateway can charge in base currency
+     */
+    public function covertToBaseCurrency($amount) {
+
+        $curentCurrencyCode =  $this->storeManager->getStore()
+            ->getCurrentCurrency()
+            ->getCode();
+        $baseCurrencyCode =  $this->storeManager->getStore()
+            ->getBaseCurrency()
+            ->getCode();
+
+        $rate = $this->currencyFactory->create()
+            ->load($curentCurrencyCode)
+            ->getAnyRate($baseCurrencyCode);
+
+        $convertedPrice = $amount * $rate;
+
+        return $convertedPrice;
     }
 
     /**
