@@ -187,6 +187,8 @@ class OrderHandlerService
         // Get the order currency
         $currency = $order->getBaseCurrency();
 
+        $amount = $this->convertToBaseCurrency($amount);
+
         // Get the x1 currency calculation mapping
         $currenciesX1 = explode(
             ',',
@@ -201,13 +203,40 @@ class OrderHandlerService
 
         // Prepare the amount
         if (in_array($currency, $currenciesX1)) {
-            return floor($amount);
+            return $amount;
         } elseif (in_array($currency, $currenciesX1000)) {
-            return floor($amount*1000);
+            return $amount*1000;
         } else {
-            return floor($amount*100);
+            return $amount*100;
         }
     }
+
+
+    /**
+     * @param $amount
+     * @return float|int
+     * Comvert amount from quote/order currency to base currency so the gateway can charge in base currency
+     */
+    public function convertToBaseCurrency($amount) {
+
+        $curentCurrencyCode =  $this->storeManager->getStore()
+            ->getCurrentCurrency()
+            ->getCode();
+        $baseCurrencyCode =  $this->storeManager->getStore()
+            ->getBaseCurrency()
+            ->getCode();
+
+        $rate = $this->currencyFactory->create()
+            ->load($curentCurrencyCode)
+            ->getAnyRate($baseCurrencyCode);
+
+        $convertedPrice = $amount * $rate;
+
+        return round($convertedPrice, 2, PHP_ROUND_HALF_UP);
+    }
+
+
+
 
     /**
      * Find an order by fields

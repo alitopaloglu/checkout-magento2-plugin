@@ -293,7 +293,7 @@ class QuoteHandlerService
          $baseCurrencyCode =  $this->storeManager->getStore()
             ->getBaseCurrency()
             ->getCode();
-         $amount = $this->covertToBaseCurrency($amount);
+         $amount = $this->convertToBaseCurrency($amount);
         // Get the x1 currency calculation mapping
         $currenciesX1 = explode(
             ',',
@@ -308,11 +308,11 @@ class QuoteHandlerService
 
         // Prepare the amount
         if (in_array($baseCurrencyCode, $currenciesX1)) {
-            return floor($amount);
+            return $amount;
         } elseif (in_array($baseCurrencyCode, $currenciesX1000)) {
-            return floor($amount*1000);
+            return $amount*1000;
         } else {
-            return floor($amount*100);
+            return $amount*100;
         }
     }
 
@@ -321,7 +321,7 @@ class QuoteHandlerService
      * @return float|int
      * Comvert amount from quote/order currency to base currency so the gateway can charge in base currency
      */
-    public function covertToBaseCurrency($amount) {
+    public function convertToBaseCurrency($amount) {
 
         $curentCurrencyCode =  $this->storeManager->getStore()
             ->getCurrentCurrency()
@@ -336,7 +336,7 @@ class QuoteHandlerService
 
         $convertedPrice = $amount * $rate;
 
-        return $convertedPrice;
+        return round($convertedPrice, 2, PHP_ROUND_HALF_UP);
     }
 
     /**
