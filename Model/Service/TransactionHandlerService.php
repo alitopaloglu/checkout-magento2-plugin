@@ -471,7 +471,7 @@ class TransactionHandlerService
         }
 
         // Convert currency amount to base amount
-        $amount = $amount / $this->order->getBaseToOrderRate();
+        $amount = round($amount, 2, PHP_ROUND_HALF_UP);
         // Add the transaction comment
         $this->payment->addTransactionCommentsToOrder(
             $this->transaction,
@@ -485,9 +485,9 @@ class TransactionHandlerService
     public function amountFromGateway($amount, $order = null)
     {
         // Get the order currency
-        $orderCurrency = $order ? $order->getOrderCurrencyCode() : $this->order->getOrderCurrencyCode();
+        $baseCurrency = $order ? $order->getBaseCurrencyCode() : $this->order->getBaseCurrencyCode();
 
-        $amount = $this->convertToOrderCurrency($amount, $orderCurrency);
+//        $amount = $this->convertToOrderCurrency($amount, $orderCurrency);
 
         // Get the x1 currency calculation mapping
         $currenciesX1 = explode(
@@ -502,9 +502,9 @@ class TransactionHandlerService
         );
 
         // Prepare the amount
-        if (in_array($orderCurrency, $currenciesX1)) {
+        if (in_array($baseCurrency, $currenciesX1)) {
             return $amount;
-        } elseif (in_array($orderCurrency, $currenciesX1000)) {
+        } elseif (in_array($baseCurrency, $currenciesX1000)) {
             return round($amount/1000, 2, PHP_ROUND_HALF_UP);
         } else {
             return round($amount/100, 2, PHP_ROUND_HALF_UP);
@@ -591,7 +591,7 @@ class TransactionHandlerService
         $creditMemos = $this->order->getCreditmemosCollection();
         if (!empty($creditMemos)) {
             foreach ($creditMemos as $creditMemo) {
-                $total += $creditMemo->getGrandTotal();
+                $total += $creditMemo->getBaseGrandTotal();
             }
         }
 
@@ -703,10 +703,10 @@ class TransactionHandlerService
         }
         
         // Get the total refunded
-        $totalRefunded = $processed ? $this->order->getTotalRefunded() : $this->order->getTotalRefunded() + $amount;
+        $totalRefunded = $processed ? $this->order->getBaseTotalRefunded() : $this->order->getBaseTotalRefunded() + $amount;
 
         // Check the partial refund case
-        $isPartialRefund = $this->order->getGrandTotal() > ($totalRefunded);
+        $isPartialRefund = $this->order->getBaseGrandTotal() > ($totalRefunded);
 
         return $isPartialRefund && $isRefund ? true : false;
     }
@@ -717,10 +717,10 @@ class TransactionHandlerService
     public function isPartialCapture($amount, $isCapture)
     {
         // Get the total captured
-        $totalCaptured = $this->order->getTotalInvoiced();
+        $totalCaptured = $this->order->getBaseTotalInvoiced();
 
         // Check the partial capture case
-        $isPartialCapture = $this->order->getGrandTotal() > ($totalCaptured + $amount);
+        $isPartialCapture = $this->order->getBaseGrandTotal() > ($totalCaptured + $amount);
 
         return $isPartialCapture && $isCapture ? true : false;
     }

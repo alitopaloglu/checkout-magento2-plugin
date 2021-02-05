@@ -293,7 +293,7 @@ class QuoteHandlerService
          $baseCurrencyCode =  $this->storeManager->getStore()
             ->getBaseCurrency()
             ->getCode();
-         $amount = $this->convertToBaseCurrency($amount);
+//         $amount = $this->convertToBaseCurrency($amount);
         // Get the x1 currency calculation mapping
         $currenciesX1 = explode(
             ',',
@@ -344,7 +344,7 @@ class QuoteHandlerService
      */
     public function getQuoteValue()
     {
-        return $this->getQuote()->collectTotals()->getGrandTotal();
+        return $this->getQuote()->collectTotals()->getBaseGrandTotal();
     }
 
     /**

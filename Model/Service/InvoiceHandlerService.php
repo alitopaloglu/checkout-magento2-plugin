@@ -89,8 +89,8 @@ class InvoiceHandlerService
         $invoice = $this->setInvoiceState($invoice);
 
         // Finalize the invoice
-        $invoice->setBaseGrandTotal($amount/$this->order->getBaseToOrderRate());
-        $invoice->setGrandTotal($this->amount);
+        $invoice->setBaseGrandTotal($amount);
+        $invoice->setGrandTotal(round($this->amount * $this->order->getBaseToOrderRate(), 2, PHP_ROUND_HALF_UP));
         $invoice->register();
 
         // Save the invoice

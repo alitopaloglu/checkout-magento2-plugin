@@ -81,6 +81,8 @@ class OrderHandlerService
      */
     public $transactionHandler;
 
+    public $currencyFactory;
+
     /**
      * OrderHandler constructor
      */
@@ -93,7 +95,8 @@ class OrderHandlerService
         \CheckoutCom\Magento2\Model\Service\QuoteHandlerService $quoteHandler,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \CheckoutCom\Magento2\Helper\Logger $logger,
-        \CheckoutCom\Magento2\Model\Service\TransactionHandlerService $transactionHandler
+        \CheckoutCom\Magento2\Model\Service\TransactionHandlerService $transactionHandler,
+        \Magento\Directory\Model\CurrencyFactory $currencyFactory
     ) {
         $this->checkoutSession = $checkoutSession;
         $this->quoteManagement = $quoteManagement;
@@ -104,6 +107,7 @@ class OrderHandlerService
         $this->storeManager = $storeManager;
         $this->logger = $logger;
         $this->transactionHandler = $transactionHandler;
+        $this->currencyFactory = $currencyFactory;
     }
 
     /**
@@ -184,10 +188,8 @@ class OrderHandlerService
      */
     public function amountToGateway($amount, $order)
     {
-        // Get the order currency
+        // Get the base currency
         $currency = $order->getBaseCurrency();
-
-        $amount = $this->convertToBaseCurrency($amount);
 
         // Get the x1 currency calculation mapping
         $currenciesX1 = explode(
@@ -211,7 +213,6 @@ class OrderHandlerService
         }
     }
 
-
     /**
      * @param $amount
      * @return float|int
@@ -234,9 +235,6 @@ class OrderHandlerService
 
         return round($convertedPrice, 2, PHP_ROUND_HALF_UP);
     }
-
-
-
 
     /**
      * Find an order by fields
