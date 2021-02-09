@@ -264,14 +264,25 @@ class PlaceOrder extends \Magento\Framework\App\Action\Action
         ->getCode();
 
         // Send the charge request
-        return $this->methodHandler
-        ->get($methodId)
-        ->sendPaymentRequest(
-            $this->data,
-            $order->getBaseGrandTotal(),
-            $order->getBaseCurrencyCode(),
-            $order->getIncrementId()
-        );
+        if ($methodId = "checkoutcom_apm") {
+            return $this->methodHandler
+                ->get($methodId)
+                ->sendPaymentRequest(
+                    $this->data,
+                    $order->getGrandTotal(),
+                    $order->getOrderCurrencyCode(),
+                    $order->getIncrementId()
+                );
+        } else {
+            return $this->methodHandler
+                ->get($methodId)
+                ->sendPaymentRequest(
+                    $this->data,
+                    $order->getBaseGrandTotal(),
+                    $order->getBaseCurrencyCode(),
+                    $order->getIncrementId()
+                );
+        }
     }
 
     public function isEmptyCardToken($paymentData)

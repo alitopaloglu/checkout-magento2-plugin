@@ -190,6 +190,27 @@ class PlaceOrder extends \Magento\Framework\App\Action\Action
             $order->getIncrementId()
         );
 
+        // Send the charge request
+        if ($methodId = "checkoutcom_apm") {
+            return $this->methodHandler
+                ->get($methodId)
+                ->sendPaymentRequest(
+                    $this->data,
+                    $order->getGrandTotal(),
+                    $order->getOrderCurrencyCode(),
+                    $order->getIncrementId()
+                );
+        } else {
+            return $this->methodHandler
+                ->get($methodId)
+                ->sendPaymentRequest(
+                    $this->data,
+                    $order->getBaseGrandTotal(),
+                    $order->getBaseCurrencyCode(),
+                    $order->getIncrementId()
+                );
+        }
+
         // Add the payment info to the order
         $order = $this->utilities
         ->setPaymentData($order, $response);

@@ -186,9 +186,15 @@ class TransactionHandlerService
         // Load the webhook data
         $payload = json_decode($webhook['event_data']);
 
+        $amount = $payload->data->amount;
+
+        if($payload->data->metadata->methodId = "checkoutcom_apm") {
+            $amount = $amount/$order->getBaseToOrderRate();
+        }
+
         // Format the amount
         $amount = $this->amountFromGateway(
-            $payload->data->amount
+            $amount
         );
 
         // Check to see if webhook is supported
@@ -511,20 +517,6 @@ class TransactionHandlerService
         }
     }
 
-    public function convertToOrderCurrency($amount, $orderCurrency) {
-
-        $baseCurrencyCode =  $this->storeManager->getStore()
-            ->getBaseCurrency()
-            ->getCode();
-
-        $rate = $this->currencyFactory->create()
-            ->load($baseCurrencyCode)
-            ->getAnyRate($orderCurrency);
-
-        $convertedPrice = $amount * $rate;
-
-        return $convertedPrice;
-    }
 
     /**
      * Create a credit memo for a refunded transaction.
