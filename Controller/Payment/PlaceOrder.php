@@ -264,7 +264,7 @@ class PlaceOrder extends \Magento\Framework\App\Action\Action
         ->getCode();
 
         // Send the charge request
-        if ($methodId = "checkoutcom_apm") {
+        if ($methodId == "checkoutcom_apm") {
             return $this->methodHandler
                 ->get($methodId)
                 ->sendPaymentRequest(
