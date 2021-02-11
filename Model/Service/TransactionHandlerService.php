@@ -188,7 +188,7 @@ class TransactionHandlerService
 
         $amount = $payload->data->amount;
 
-        if($payload->data->metadata->methodId = "checkoutcom_apm") {
+        if($payload->data->metadata->methodId === "checkoutcom_apm") {
             $amount = $amount/$order->getBaseToOrderRate();
         }
 
