@@ -34,6 +34,11 @@ class TransactionHandlerService
     ];
 
     /**
+     * @var Logger
+     */
+    public $logger;
+    
+    /**
      * @var \Magento\Sales\Model\Order
      */
     public $orderModel;
@@ -124,6 +129,7 @@ class TransactionHandlerService
      * TransactionHandlerService constructor.
      */
     public function __construct(
+        \CheckoutCom\Magento2\Helper\Logger $logger,
         \Magento\Sales\Model\Order\Email\Sender\OrderSender $orderSender,
         \Magento\Sales\Api\Data\TransactionSearchResultInterfaceFactory $transactionSearch,
         \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transactionBuilder,
@@ -139,6 +145,7 @@ class TransactionHandlerService
         \Magento\Sales\Model\Order $orderModel,
         \Magento\Sales\Model\Convert\OrderFactory $convertOrderFactory
     ) {
+        $this->logger = $logger;
         $this->orderSender           = $orderSender;
         $this->transactionSearch     = $transactionSearch;
         $this->transactionBuilder    = $transactionBuilder;
@@ -231,6 +238,8 @@ class TransactionHandlerService
      */
     public function getTransactions($orderId, $transactionId = null)
     {
+        $this->logger->write('get transactions - order ID: ' . $orderId);
+        
         // Get the list of transactions
         $transactions = $this->transactionSearch->create()
             ->addOrderIdFilter($orderId)
