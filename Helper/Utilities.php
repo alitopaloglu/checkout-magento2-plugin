@@ -76,7 +76,7 @@ class Utilities
             array_intersect_key((array)$data, array_flip(['id']))
         );
 
-        if (isset($source)) {
+        if (isset($source['methodId'])) {
             if ($source['methodId'] == 'checkoutcom_apm') {
                 // Add apm to payment information
                 $paymentInfo->setAdditionalInformation(
